@@ -1,45 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Private Chat</title>
 
     <style>
-
-        body{
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .box{
-            background:#1e293b;
-            padding:30px;
-            border-radius:10px;
-            width:300px;
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            overflow-x: hidden;
+        }
+
+        .box {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 0.625rem;
+            width: 100%;
+            max-width: 20rem;
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         h2 {
-            margin: 0 0 20px;
-            font-size: 2rem;
+            margin: 0 0 1.25rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             background: linear-gradient(90deg, #38bdf8, #a855f7, #f97316);
             -webkit-background-clip: text;
-            color: transparent;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
         }
 
-        input{
-            width:100%;
-            padding:10px;
-            margin-top:10px;
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 0.625rem;
             border: 1px solid #334155;
-            border-radius: 8px;
+            border-radius: 0.5rem;
             background: #0f172a;
             color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input::placeholder {
+            color: #64748b;
         }
 
         input:focus {
@@ -48,32 +70,57 @@
             box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
         }
 
-        button{
-            width:100%;
-            padding:10px;
-            margin-top:20px;
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 1.25rem;
             background: linear-gradient(90deg, #38bdf8, #8b5cf6);
-            border:none;
-            cursor:pointer;
+            border: none;
+            cursor: pointer;
             color: #0f172a;
             font-weight: 700;
-            border-radius: 8px;
+            font-size: 1rem;
+            border-radius: 0.5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        button:hover{
-            transform: translateY(-1px);
+        button:hover {
+            transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(56, 189, 248, 0.25);
         }
 
-        h2:hover{
-            transform: translateY(-2px) scale(1.01);
-            text-shadow: 0 0 18px rgba(168,85,247,0.25);
+        button:active {
+            transform: translateY(0);
         }
 
-        .box:hover{
+        h2:hover {
+            transform: translateY(-2px) scale(1.01);
+            text-shadow: 0 0 18px rgba(168, 85, 247, 0.25);
+        }
+
+        .box:hover {
             transform: translateY(-3px);
-            box-shadow: 0 30px 60px rgba(2,6,23,0.5);
+            box-shadow: 0 30px 60px rgba(2, 6, 23, 0.5);
+        }
+
+        /* Tablet (640px and up) */
+        @media (min-width: 40rem) {
+            html {
+                font-size: 16px;
+            }
+
+            .box {
+                max-width: 24rem;
+                padding: 2.5rem;
+            }
+        }
+
+        /* Desktop (1024px and up) */
+        @media (min-width: 64rem) {
+            .box {
+                max-width: 28rem;
+                padding: 3rem;
+            }
         }
 
     </style>
