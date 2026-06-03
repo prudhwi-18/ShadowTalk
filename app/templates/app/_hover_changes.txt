@@ -1,0 +1,5 @@
+Patch notes:
+- room.html: added hover effects for .user-list span, #messages p, #messages p:hover, #messages p .username hover, send button hover/active focus
+- index.html: ensured button hover and input focus already present; added subtle hover to headings
+
+(Temporary file for record)

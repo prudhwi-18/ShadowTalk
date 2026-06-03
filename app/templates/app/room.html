@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+
+    <style>
+
+        body{
+            background:#0f172a;
+            color:white;
+            font-family:Arial;
+        }
+
+        .chat-box{
+            width:80%;
+            margin:auto;
+            margin-top:40px;
+            max-width: 900px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #38bdf8, #a855f7, #f472b6);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+            transition: transform 0.15s ease, text-shadow 0.15s ease;
+        }
+
+        h2:hover{
+            transform: translateY(-3px) scale(1.01);
+            text-shadow: 0 0 18px rgba(168,85,247,0.25);
+        }
+
+        .room-meta{
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user-list strong,
+        .user-list span {
+            display: inline-block;
+            color: #cbd5e1;
+        }
+
+        .user-list strong {
+            color: #38bdf8;
+            text-shadow: 0 0 6px rgba(56, 189, 248, 0.45);
+        }
+
+        .user-list span {
+            background: linear-gradient(120deg, #a855f7, #38bdf8, #f472b6);
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            transition: transform 0.12s ease, filter 0.12s ease;
+        }
+
+        .user-list span:hover{
+            transform: translateY(-2px);
+            filter: drop-shadow(0 6px 18px rgba(168,85,247,0.18));
+            cursor: pointer;
+        }
+
+        .user-list,
+        .typing-indicator{
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .typing-indicator{
+            min-height: 1.4em;
+        }
+
+        #messages{
+            height:400px;
+            overflow-y:auto;
+            border:1px solid white;
+            padding:20px;
+            background: rgba(255,255,255,0.04);
+        }
+
+        #messages p{
+            margin: 0 0 10px;
+            word-break: break-word;
+            padding: 8px 10px;
+            border-radius: 8px;
+            transition: background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        #messages p:hover{
+            background: rgba(255,255,255,0.03);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 24px rgba(2,6,23,0.5);
+        }
+
+        #messages p b{
+            color: #a5b4fc;
+            transition: color 0.12s ease, text-shadow 0.12s ease;
+        }
+
+        #messages p:hover b{
+            color: #f472b6;
+            text-shadow: 0 0 8px rgba(244,114,182,0.18);
+        }
+
+        input{
+            padding:10px;
+            width:80%;
+            box-sizing: border-box;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: box-shadow 0.12s ease, border-color 0.12s ease;
+        }
+
+        input:focus{
+            outline: none;
+            border-color: rgba(56,189,248,0.3);
+            box-shadow: 0 8px 20px rgba(2,6,23,0.6);
+        }
+
+        #sendButton{
+            padding:10px 16px;
+            background: linear-gradient(90deg,#06b6d4,#7c3aed,#fb7185);
+            border: none;
+            color: #021025;
+            font-weight:700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+        }
+
+        #sendButton:hover{
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59,130,246,0.18);
+            opacity: 0.98;
+        }
+
+        #sendButton:active{
+            transform: translateY(0) scale(0.99);
+        }
+
+        @media (max-width: 640px) {
+            .chat-box {
+                width: 95%;
+                margin-top: 20px;
+            }
+
+            input,
+            button {
+                width: 100%;
+            }
+
+            input {
+                margin-bottom: 10px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="chat-box">
+
+    <h2>Room: {{ room_name }}</h2>
+
+    <div class="room-meta">
+        <div class="user-list">
+            <strong>Online:</strong> <span id="userNames">Loading...</span>
+        </div>
+        <div id="typingIndicator" class="typing-indicator"></div>
+    </div>
+
+    <div id="messages"></div>
+
+    <br>
+
+    <input type="text" id="messageInput" placeholder="Type a message...">
+
+    <button id="sendButton" type="button" disabled>Send</button>
+
+</div>
+
+<script>
+
+    const currentUser = "{{ username|escapejs }}";
+    const roomName = "{{ room_name|escapejs }}";
+
+    const socketProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socketUrl = socketProtocol + window.location.host + '/ws/chat/' + roomName + '/';
+    const socket = new WebSocket(socketUrl);
+    const messagesEl = document.querySelector('#messages');
+    const inputEl = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const userNamesEl = document.getElementById('userNames');
+    const typingEl = document.getElementById('typingIndicator');
+
+    let typing = false;
+    let stopTypingTimer;
+    const TYPING_TIMEOUT = 1000;
+
+    sendButton.disabled = true;
+    sendButton.onclick = sendMessage;
+
+    socket.onopen = function() {
+        console.log('WebSocket connected:', socketUrl);
+        sendButton.disabled = false;
+    };
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if ('user_list' in data) {
+            updateUserList(data.user_list);
+            return;
+        }
+
+        if ('typing' in data) {
+            updateTypingIndicator(data.username, data.typing);
+            return;
+        }
+
+        appendMessage(data.username, data.message);
+    };
+
+    socket.onclose = function() {
+        console.log('WebSocket closed');
+        sendButton.disabled = true;
+    };
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+
+    inputEl.addEventListener('input', function() {
+        const isTyping = inputEl.value.trim().length > 0;
+
+        if (isTyping !== typing) {
+            typing = isTyping;
+            sendTypingState(typing);
+        }
+
+        clearTimeout(stopTypingTimer);
+        if (isTyping) {
+            stopTypingTimer = setTimeout(function() {
+                typing = false;
+                sendTypingState(false);
+            }, TYPING_TIMEOUT);
+        }
+    });
+
+    inputEl.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function appendMessage(username, message) {
+        if (!message) {
+            return;
+        }
+        messagesEl.innerHTML += `<p><b>${username}</b>: ${message}</p>`;
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function updateUserList(users) {
+        if (!users || users.length === 0) {
+            userNamesEl.textContent = 'No users online';
+            return;
+        }
+        userNamesEl.textContent = users.join(', ');
+    }
+
+    function updateTypingIndicator(sender, isTyping) {
+        if (sender === currentUser) {
+            return;
+        }
+
+        typingEl.textContent = isTyping ? `${sender} is typing...` : '';
+    }
+
+    function sendTypingState(isTyping) {
+        if (socket.readyState !== WebSocket.OPEN) {
+            return;
+        }
+
+        socket.send(JSON.stringify({
+            'typing': isTyping,
+            'username': currentUser,
+        }));
+    }
+
+    function sendMessage(){
+        const message = inputEl.value.trim();
+        if (!message) {
+            return;
+        }
+        if (socket.readyState !== WebSocket.OPEN) {
+            appendMessage('System', 'Cannot send message: connection is not open.');
+            return;
+        }
+
+        socket.send(JSON.stringify({
+            'message': message,
+            'username': currentUser
+        }));
+        inputEl.value = '';
+        typing = false;
+        sendTypingState(false);
+    }
+
+</script>
+
+</body>
+</html>
