@@ -1,50 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Chat Room</title>
 
     <style>
-
-        body{
-            background:#0f172a;
-            color:white;
-            font-family:Arial;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .chat-box{
-            width:80%;
-            margin:auto;
-            margin-top:40px;
-            max-width: 900px;
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 1rem;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chat-box {
+            width: 100%;
+            max-width: 56.25rem;
+            margin: 1.25rem auto 0;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
         }
 
         h2 {
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             margin-bottom: 0.5rem;
             background: linear-gradient(90deg, #38bdf8, #a855f7, #f472b6);
             -webkit-background-clip: text;
-            color: transparent;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
             transition: transform 0.15s ease, text-shadow 0.15s ease;
+            word-break: break-word;
         }
 
-        h2:hover{
+        h2:hover {
             transform: translateY(-3px) scale(1.01);
-            text-shadow: 0 0 18px rgba(168,85,247,0.25);
+            text-shadow: 0 0 18px rgba(168, 85, 247, 0.25);
         }
 
-        .room-meta{
+        .room-meta {
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
-        .user-list strong,
-        .user-list span {
-            display: inline-block;
+        .user-list {
+            font-size: clamp(0.875rem, 3vw, 1rem);
             color: #cbd5e1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
         }
 
         .user-list strong {
@@ -55,109 +78,187 @@
         .user-list span {
             background: linear-gradient(120deg, #a855f7, #38bdf8, #f472b6);
             -webkit-background-clip: text;
-            color: transparent;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 700;
             transition: transform 0.12s ease, filter 0.12s ease;
+            word-break: break-word;
         }
 
-        .user-list span:hover{
+        .user-list span:hover {
             transform: translateY(-2px);
-            filter: drop-shadow(0 6px 18px rgba(168,85,247,0.18));
+            filter: drop-shadow(0 6px 18px rgba(168, 85, 247, 0.18));
             cursor: pointer;
         }
 
-        .user-list,
-        .typing-indicator{
-            font-size: 0.95rem;
+        .typing-indicator {
+            font-size: clamp(0.875rem, 3vw, 1rem);
             color: #cbd5e1;
-        }
-
-        .typing-indicator{
             min-height: 1.4em;
         }
 
-        #messages{
-            height:400px;
-            overflow-y:auto;
-            border:1px solid white;
-            padding:20px;
-            background: rgba(255,255,255,0.04);
+        #messages {
+            flex: 1;
+            min-height: 15rem;
+            max-height: 50vh;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 0.5rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
-        #messages p{
-            margin: 0 0 10px;
+        #messages p {
+            margin: 0 0 0.625rem;
             word-break: break-word;
-            padding: 8px 10px;
-            border-radius: 8px;
+            padding: 0.5rem 0.625rem;
+            border-radius: 0.5rem;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            line-height: 1.5;
             transition: background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
         }
 
-        #messages p:hover{
-            background: rgba(255,255,255,0.03);
-            transform: translateY(-4px);
-            box-shadow: 0 6px 24px rgba(2,6,23,0.5);
+        #messages p:hover {
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(2, 6, 23, 0.5);
         }
 
-        #messages p b{
+        #messages p b {
             color: #a5b4fc;
             transition: color 0.12s ease, text-shadow 0.12s ease;
         }
 
-        #messages p:hover b{
+        #messages p:hover b {
             color: #f472b6;
-            text-shadow: 0 0 8px rgba(244,114,182,0.18);
+            text-shadow: 0 0 8px rgba(244, 114, 182, 0.18);
         }
 
-        input{
-            padding:10px;
-            width:80%;
-            box-sizing: border-box;
-            border-radius: 8px;
-            border: 1px solid transparent;
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        input {
+            padding: 0.75rem;
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 1rem;
             transition: box-shadow 0.12s ease, border-color 0.12s ease;
         }
 
-        input:focus{
-            outline: none;
-            border-color: rgba(56,189,248,0.3);
-            box-shadow: 0 8px 20px rgba(2,6,23,0.6);
+        input::placeholder {
+            color: #64748b;
         }
 
-        #sendButton{
-            padding:10px 16px;
-            background: linear-gradient(90deg,#06b6d4,#7c3aed,#fb7185);
+        input:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 8px 20px rgba(2, 6, 23, 0.6);
+        }
+
+        #sendButton {
+            padding: 0.75rem 1rem;
+            width: 100%;
+            background: linear-gradient(90deg, #06b6d4, #7c3aed, #fb7185);
             border: none;
             color: #021025;
-            font-weight:700;
-            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 0.5rem;
             cursor: pointer;
             transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
         }
 
-        #sendButton:hover{
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(59,130,246,0.18);
+        #sendButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.18);
             opacity: 0.98;
         }
 
-        #sendButton:active{
+        #sendButton:active {
             transform: translateY(0) scale(0.99);
         }
 
-        @media (max-width: 640px) {
+        #sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Tablets (640px and up) */
+        @media (min-width: 40rem) {
             .chat-box {
-                width: 95%;
-                margin-top: 20px;
+                margin-top: 2rem;
             }
 
-            input,
-            button {
-                width: 100%;
+            #messages {
+                min-height: 20rem;
+            }
+
+            .input-container {
+                flex-direction: row;
+                gap: 0.75rem;
+                align-items: flex-end;
             }
 
             input {
-                margin-bottom: 10px;
+                flex: 1;
+                min-width: 0;
             }
+
+            #sendButton {
+                width: auto;
+                flex-shrink: 0;
+                padding: 0.75rem 2rem;
+            }
+        }
+
+        /* Desktop (1024px and up) */
+        @media (min-width: 64rem) {
+            .chat-box {
+                margin-top: 2.5rem;
+                padding: 0;
+            }
+
+            #messages {
+                min-height: 25rem;
+                max-height: 60vh;
+            }
+        }
+
+        /* Large Desktop (1440px and up) */
+        @media (min-width: 90rem) {
+            .chat-box {
+                max-width: 60rem;
+            }
+        }
+
+        /* Scrollbar styling for messages */
+        #messages::-webkit-scrollbar {
+            width: 0.5rem;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 0.5rem;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 0.5rem;
+            opacity: 0.6;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            opacity: 0.9;
         }
 
     </style>
@@ -177,11 +278,10 @@
 
     <div id="messages"></div>
 
-    <br>
-
-    <input type="text" id="messageInput" placeholder="Type a message...">
-
-    <button id="sendButton" type="button" disabled>Send</button>
+    <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button id="sendButton" type="button" disabled>Send</button>
+    </div>
 
 </div>
 
